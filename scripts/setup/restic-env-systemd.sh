@@ -1,19 +1,39 @@
 #!/bin/bash
-# Restic environment loader for systemd service
-# This version doesn't require sudo since systemd runs as root
+# Secure Restic environment loader
+# This script should be installed with restrictive permissions (700)
 
-export RESTIC_REPOSITORY=/mnt/backup-drive/restic-repo
+set -euo pipefail
 
-# Check if credential exists
-if systemd-creds list | grep -q "restic-password"; then
-    export RESTIC_PASSWORD=$(systemd-creds decrypt /etc/credstore/restic-password -)
+# Load configuration
+if [[ -f "/etc/backup-system/backup.conf" ]]; then
+    source "/etc/backup-system/backup.conf"
+elif [[ -f "$HOME/.config/backup-system/backup.conf" ]]; then
+    source "$HOME/.config/backup-system/backup.conf"
 else
-    # Fallback to .restic-env if password not yet encrypted
-    if [[ -f /home/b3l13v3r/scripts/.restic-env ]]; then
-        source /home/b3l13v3r/scripts/.restic-env
-    else
-        echo "Error: Restic password not configured!"
-        echo "Run: sudo /home/b3l13v3r/scripts/setup-restic-password.sh"
-        exit 1
-    fi
+    echo "Error: No backup configuration found!" >&2
+    exit 1
+fi
+
+# Set repository path
+export RESTIC_REPOSITORY="${RESTIC_REPOSITORY:-${RESTIC_REPO_DIR:-/mnt/backup-storage/restic-repo}}"
+
+# Load password securely
+if command -v systemd-creds &> /dev/null && systemd-creds list 2>/dev/null | grep -q "restic-password"; then
+    # Use systemd-creds if available
+    export RESTIC_PASSWORD=$(systemd-creds cat restic-password 2>/dev/null)
+elif [[ -f "$HOME/.config/backup-system/.restic-env" ]]; then
+    # Load from user config
+    set +x  # Ensure passwords aren't printed
+    source "$HOME/.config/backup-system/.restic-env"
+    set -x
+else
+    echo "Error: Restic password not configured!" >&2
+    echo "Run setup-restic-password.sh to configure" >&2
+    exit 1
+fi
+
+# Verify configuration
+if [[ -z "${RESTIC_PASSWORD:-}" ]]; then
+    echo "Error: RESTIC_PASSWORD not set!" >&2
+    exit 1
 fi

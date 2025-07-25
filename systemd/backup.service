@@ -5,11 +5,13 @@ Wants=backup.timer
 
 [Service]
 Type=oneshot
-User=b3l13v3r
-Group=b3l13v3r
+# Replace USERNAME with your actual username
+# Replace UID with your user ID (get with: id -u)
+User=USERNAME
+Group=USERNAME
 Environment=DISPLAY=:0
-Environment=XDG_RUNTIME_DIR=/run/user/1000
-ExecStart=/home/b3l13v3r/scripts/master-backup.sh
+Environment=XDG_RUNTIME_DIR=/run/user/UID
+ExecStart=/usr/local/bin/backup-master.sh
 StandardOutput=journal
 StandardError=journal
 

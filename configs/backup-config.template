@@ -1,0 +1,32 @@
+# Modern Arch Linux Backup System Configuration Template
+# Copy this file to ~/.config/backup-system/backup-config and customize for your system
+
+# Base directories
+BACKUP_BASE_DIR="/opt/backup-system"
+CONFIG_DIR="$HOME/.config/backup-system"
+SCRIPT_DIR="/usr/local/bin"
+
+# User configuration
+BACKUP_USER="$USER"
+BACKUP_GROUP="backup"
+
+# Storage locations (customize these for your system)
+BACKUP_STORAGE_ROOT="/mnt/backup-storage"
+BTRBK_SNAPSHOTS_DIR="$BACKUP_STORAGE_ROOT/btrbk-snapshots"
+RESTIC_REPO_DIR="$BACKUP_STORAGE_ROOT/restic-repo"
+SYSTEM_BACKUPS_DIR="$BACKUP_STORAGE_ROOT/system-backups"
+
+# System configuration
+BTRBK_CONFIG="/etc/btrbk/btrbk.conf"
+SYSTEMD_SERVICE_DIR="/etc/systemd/system"
+
+# Restic configuration
+RESTIC_REPOSITORY="$RESTIC_REPO_DIR"
+RESTIC_PASSWORD_FILE="$CONFIG_DIR/restic-password"
+
+# Notification settings
+NOTIFICATION_SCRIPT="$SCRIPT_DIR/kde-notify-final.sh"
+NOTIFICATION_USER="$BACKUP_USER"
+
+# Logging
+LOG_TAG="backup-system"

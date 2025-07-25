@@ -1,0 +1,26 @@
+# btrbk configuration template
+# Copy this to /etc/btrbk/btrbk.conf and customize the target path
+
+timestamp_format        long
+
+# Snapshot settings
+snapshot_preserve_min   6h
+snapshot_preserve       24h 7d 4w 6m
+
+# Target settings  
+target_preserve_min     6h
+target_preserve         24h 7d 4w 6m
+
+# System root snapshots
+volume /
+  snapshot_dir .snapshots
+  # Replace with your backup storage path
+  target /mnt/backup-storage/btrbk-snapshots/root
+  subvolume /
+  subvolume /home
+
+# Optional: Add more volumes as needed
+# volume /data
+#   snapshot_dir .snapshots
+#   target /mnt/backup-storage/btrbk-snapshots/data
+#   subvolume /data

@@ -85,34 +85,46 @@ modern-arch-backup-system/
 ### Installation
 
 1. Clone this repository:
+
    ```bash
    git clone https://github.com/yourusername/modern-arch-backup-system
    cd modern-arch-backup-system
    ```
 
 2. Run the setup script:
+
    ```bash
-   sudo ./scripts/setup/setup-backup-system.sh
+   sudo ./scripts/setup/setup-backup-system-new.sh
    ```
 
-3. Configure your Restic password:
+3. Test your installation:
+
+   ```bash
+   ./scripts/test-installation.sh
+   ```
+
+4. Configure your Restic password:
+
    ```bash
    sudo ./scripts/setup/setup-restic-password.sh
    ```
 
-4. Test the backup system:
+5. Run a test backup:
+
    ```bash
-   sudo ./scripts/backup/system-backup.sh
+   sudo /usr/local/bin/system-backup.sh
    ```
 
 ## Documentation
 
 - **[Complete Setup Guide](docs/BACKUP_GUIDE.md)** - Comprehensive installation and usage guide
-- **[Security Documentation](docs/SECURITY-README.md)** - Security considerations and best practices
+- **[Security Documentation](docs/SECURITY-README.md)** - Password management and encryption
+- **[Security Best Practices](docs/SECURITY-BEST-PRACTICES.md)** - Security hardening guide
 
 ## Configuration
 
 Key configuration files:
+
 - `configs/btrbk.conf` - BTRFS snapshot configuration
 - `configs/backup-sudoers` - Sudo permissions for backup scripts
 - `systemd/backup.timer` - Backup schedule configuration
@@ -129,6 +141,7 @@ The system supports multiple recovery scenarios:
 ## Monitoring
 
 Monitor your backups through:
+
 - KDE desktop notifications
 - Systemd journal logs
 - Backup status commands
@@ -148,11 +161,12 @@ Contributions are welcome! Please:
 
 - Arch Linux
 - BTRFS filesystem
-- KDE Plasma Desktop
-- Python 3 (for notifications)
+- KDE Plasma Desktop (or any desktop with D-Bus notifications)
+- Python 3 with python-dbus
 - btrbk
 - restic
-- systemd
+- systemd (version 250+ for systemd-creds)
+- libnotify
 
 ## License
 

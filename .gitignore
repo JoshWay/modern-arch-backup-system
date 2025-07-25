@@ -33,3 +33,11 @@ Thumbs.db
 # Personal configuration overrides
 local-config/
 user-overrides/
+
+# User configuration files (contain personal paths)
+~/.config/backup-system/
+backup.conf
+.restic-env
+
+# Exclude user's personal btrbk config
+/home/*/scripts/btrbk.conf

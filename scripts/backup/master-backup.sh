@@ -5,16 +5,12 @@
 
 set -e
 
-# Function to send KDE notifications
-send_notification() {
-    local title="$1"
-    local message="$2"
-    local urgency="$3"  # low, normal, critical
-    local icon="$4"
-    
-    # Send notification via notify-send (works with KDE Plasma)
-    notify-send --urgency="$urgency" --icon="$icon" "$title" "$message"
-}
+# Load common configuration
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+source "${SCRIPT_DIR}/../common/load-config.sh"
+
+# Use the notify function from common config
+alias send_notification=notify
 
 # Function to log with timestamp
 log_message() {
@@ -32,24 +28,23 @@ echo "Starting Master Backup Process"
 echo "========================================"
 
 # Check if backup drive is mounted
-if ! mountpoint -q /mnt/sdb-btrfs; then
-    echo "ERROR: Backup drive not mounted at /mnt/sdb-btrfs"
-    send_notification "Backup Failed" "Backup drive not mounted at /mnt/sdb-btrfs" "critical" "dialog-error"
+if ! mountpoint -q "$BACKUP_STORAGE_ROOT"; then
+    echo "ERROR: Backup drive not mounted at $BACKUP_STORAGE_ROOT"
+    send_notification "Backup Failed" "Backup drive not mounted at $BACKUP_STORAGE_ROOT" "critical" "dialog-error"
     exit 1
 fi
 
 # Check if we have sudo access for backup commands
 if ! sudo -n true 2>/dev/null; then
     echo "ERROR: This script requires passwordless sudo access for backup operations"
-    echo "Please run the following command to enable it:"
-    echo "sudo cp /home/b3l13v3r/scripts/backup-sudoers /etc/sudoers.d/backup-operations"
+    echo "Please run the setup script to configure sudo access"
     send_notification "Backup Failed" "Passwordless sudo required. Check terminal for setup instructions." "critical" "dialog-error"
     exit 1
 fi
 
 # Check available space
 echo "Checking backup drive space..."
-df -h /mnt/sdb-btrfs
+df -h "$BACKUP_STORAGE_ROOT"
 
 echo ""
 echo "========================================"
@@ -57,7 +52,7 @@ echo "Running System Backup (btrbk)"
 echo "========================================"
 
 # Run system backup
-sudo btrbk -c /home/b3l13v3r/scripts/btrbk.conf run
+sudo btrbk -c "$BTRBK_CONFIG" run
 
 echo ""
 echo "========================================"
@@ -65,7 +60,7 @@ echo "Running Essential Home Backup"
 echo "========================================"
 
 # Run essential home backup
-CALLED_FROM_MASTER=true /home/b3l13v3r/scripts/essential-home-backup.sh
+CALLED_FROM_MASTER=true "$BACKUP_SCRIPTS_DIR/essential-home-backup.sh"
 
 echo ""
 echo "========================================"
@@ -73,30 +68,25 @@ echo "Backup Summary"
 echo "========================================"
 
 echo "Current backups on target drive:"
-ls -lah /mnt/backup-drive/btrbk-snapshots/ | grep -E "(ROOT|home-essential)" | tail -10
+ls -lah "$BTRBK_SNAPSHOTS_DIR" | grep -E "(ROOT|home-essential)" | tail -10
 
 echo ""
 echo "Disk usage after backup:"
-df -h /mnt/sdb-btrfs
+df -h "$BACKUP_STORAGE_ROOT"
 
 echo ""
 echo "========================================"
 echo "Master Backup Completed Successfully"
 echo "========================================"
 
-# Move ISO file back if it was moved
-if [ -f /tmp/backup-exclude/Win11_23H2_English_x64v2.iso ]; then
-    echo "Moving ISO file back to original location..."
-    mv /tmp/backup-exclude/Win11_23H2_English_x64v2.iso /home/b3l13v3r/shared/WAYLIFE_Share/ 2>/dev/null || {
-        echo "Warning: Could not move ISO file back"
-    }
-fi
+# Move ISO file back if it was moved (if specific to user setup)
+# This section can be customized in user's backup.conf if needed
 
 # Get backup statistics for notification
 CURRENT_TIME=$(date '+%Y-%m-%d %H:%M:%S')
-DISK_USAGE=$(df -h /mnt/sdb-btrfs | tail -1 | awk '{print $3 " used of " $2 " (" $5 ")"}')
-ROOT_COUNT=$(ls -1 /mnt/backup-drive/btrbk-snapshots/ROOT* 2>/dev/null | wc -l)
-HOME_COUNT=$(ls -1 /mnt/backup-drive/btrbk-snapshots/home-essential* 2>/dev/null | wc -l)
+DISK_USAGE=$(df -h "$BACKUP_STORAGE_ROOT" | tail -1 | awk '{print $3 " used of " $2 " (" $5 ")"}')
+ROOT_COUNT=$(ls -1 "$BTRBK_SNAPSHOTS_DIR"/ROOT* 2>/dev/null | wc -l)
+HOME_COUNT=$(ls -1 "$BTRBK_SNAPSHOTS_DIR"/home-essential* 2>/dev/null | wc -l)
 
 log_message "Backup process completed successfully"
 send_notification "Backup Completed Successfully" "✅ System: $ROOT_COUNT snapshots\n🏠 Home: $HOME_COUNT snapshots\n💾 Storage: $DISK_USAGE" "normal" "security-high"

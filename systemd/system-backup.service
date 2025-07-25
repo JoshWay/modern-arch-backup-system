@@ -1,0 +1,25 @@
+[Unit]
+Description=Modern Arch Linux Backup System
+After=network.target
+Wants=system-backup.timer
+
+[Service]
+Type=oneshot
+# This service runs as root for system backups
+# User notifications are handled via the notification script
+Environment=BACKUP_CONFIG_FILE=/etc/backup-system/backup.conf
+EnvironmentFile=-/etc/backup-system/backup.conf
+ExecStart=/usr/local/bin/system-backup.sh
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=backup-system
+
+# Security hardening
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/mnt /var/log
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

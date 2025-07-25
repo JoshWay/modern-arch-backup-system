@@ -3,14 +3,21 @@
 # Selective Home Backup Script
 # This script creates a clean snapshot of home directory excluding unnecessary data
 
-set -e
+set -euo pipefail
+
+# Load common configuration
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+source "${SCRIPT_DIR}/../common/load-config.sh"
 
 TIMESTAMP=$(date +%Y%m%dT%H%M)
-HOME_USER="b3l13v3r"
-SOURCE_HOME="/home/$HOME_USER"
+HOME_USER="${BACKUP_USER:-$USER}"
+SOURCE_HOME="$HOME"
 SNAPSHOT_DIR="/.snapshots"
-TARGET_DIR="/mnt/backup-drive/btrbk-snapshots"
-TEMP_DIR="/tmp/home-backup-$TIMESTAMP"
+TARGET_DIR="$BTRBK_SNAPSHOTS_DIR"
+
+# Create secure temporary directory
+TEMP_DIR=$(mktemp -d -t "home-backup-${TIMESTAMP}-XXXXXX")
+trap 'rm -rf "$TEMP_DIR"' EXIT
 
 # Directories/files to exclude (high space usage, non-essential for recovery)
 EXCLUDES=(
@@ -92,13 +99,14 @@ echo "Excluded patterns: ${EXCLUDES[*]}"
 mkdir -p "$TEMP_DIR"
 
 # Use rsync to copy home directory excluding unwanted files
-RSYNC_EXCLUDES=""
+# Build exclude arguments as an array for proper quoting
+RSYNC_ARGS=()
 for exclude in "${EXCLUDES[@]}"; do
-    RSYNC_EXCLUDES="$RSYNC_EXCLUDES --exclude=$exclude"
+    RSYNC_ARGS+=("--exclude=$exclude")
 done
 
 echo "Copying essential files from $SOURCE_HOME to $TEMP_DIR..."
-rsync -av $RSYNC_EXCLUDES "$SOURCE_HOME/" "$TEMP_DIR/"
+rsync -av "${RSYNC_ARGS[@]}" "$SOURCE_HOME/" "$TEMP_DIR/"
 
 # Create btrfs subvolume from the selective copy
 echo "Creating btrfs subvolume..."
@@ -112,8 +120,7 @@ sudo cp -a "$TEMP_DIR/." "$SNAPSHOT_DIR/home-essential.$TIMESTAMP/"
 echo "Sending snapshot to backup target..."
 sudo btrfs send "$SNAPSHOT_DIR/home-essential.$TIMESTAMP" | sudo btrfs receive "$TARGET_DIR/"
 
-# Clean up temp directory
-rm -rf "$TEMP_DIR"
+# Clean up is handled by trap on EXIT
 
 echo "Selective home backup completed: home-essential.$TIMESTAMP"
 echo "Backup size:"

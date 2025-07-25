@@ -3,9 +3,9 @@
 
 set -euo pipefail
 
-# Load path configuration
+# Load common configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-source "$(dirname "$(dirname "$SCRIPT_DIR")")/config/paths.sh"
+source "${SCRIPT_DIR}/../common/load-config.sh"
 
 # Trap to handle errors and send failure notification
 error_handler() {
@@ -18,13 +18,15 @@ error_handler() {
 trap 'error_handler' ERR
 
 # Use secure password loading if available, fallback to .restic-env
-if [[ -f "$RESTIC_ENV_SECURE" ]]; then
-    source "$RESTIC_ENV_SECURE"
+if command -v systemd-creds &> /dev/null && systemd-creds list 2>/dev/null | grep -q restic-password; then
+    # Load password from systemd-creds
+    export RESTIC_PASSWORD=$(systemd-creds cat restic-password)
 elif [[ -f "$RESTIC_ENV_FILE" ]]; then
+    # Load from environment file
     source "$RESTIC_ENV_FILE"
 else
     echo "Error: No Restic environment configuration found!"
-    echo "Run: sudo $SETUP_SCRIPTS_DIR/setup-restic-password.sh"
+    echo "Run setup-restic-password.sh to configure"
     exit 1
 fi
 
@@ -48,27 +50,30 @@ sudo btrbk -c "$BTRBK_CONFIG" run
 
 # 2. Package lists
 log "Backing up package lists..."
-pacman -Qe > /mnt/backup-drive/system-backups/packages/pkglist-$BACKUP_DATE.txt
-pacman -Qm > /mnt/backup-drive/system-backups/packages/foreign-pkglist-$BACKUP_DATE.txt
-pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > /mnt/backup-drive/system-backups/packages/native-pkglist-$BACKUP_DATE.txt
+mkdir -p "$SYSTEM_BACKUPS_DIR/packages"
+pacman -Qe > "$SYSTEM_BACKUPS_DIR/packages/pkglist-$BACKUP_DATE.txt"
+pacman -Qm > "$SYSTEM_BACKUPS_DIR/packages/foreign-pkglist-$BACKUP_DATE.txt"
+pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > "$SYSTEM_BACKUPS_DIR/packages/native-pkglist-$BACKUP_DATE.txt"
 
 # 3. System configurations
 log "Backing up system configurations..."
-sudo tar -czf /mnt/backup-drive/system-backups/configs/etc-$BACKUP_DATE.tar.gz /etc
-tar -czf /mnt/backup-drive/system-backups/configs/dotfiles-$BACKUP_DATE.tar.gz \
-    /home/b3l13v3r/.config \
-    /home/b3l13v3r/.local \
-    /home/b3l13v3r/.bashrc \
-    /home/b3l13v3r/.zshrc \
-    /home/b3l13v3r/.gitconfig \
+mkdir -p "$SYSTEM_BACKUPS_DIR/configs"
+sudo tar -czf "$SYSTEM_BACKUPS_DIR/configs/etc-$BACKUP_DATE.tar.gz" /etc
+tar -czf "$SYSTEM_BACKUPS_DIR/configs/dotfiles-$BACKUP_DATE.tar.gz" \
+    "$HOME/.config" \
+    "$HOME/.local" \
+    "$HOME/.bashrc" \
+    "$HOME/.zshrc" \
+    "$HOME/.gitconfig" \
     2>/dev/null || true
 
 # 4. Bootloader and partition info
 log "Backing up bootloader and partition table..."
-sudo dd if=/dev/nvme0n1 of=/mnt/backup-drive/system-backups/bootloader/nvme0n1-mbr-$BACKUP_DATE.img bs=512 count=2048
-sudo dd if=/dev/nvme0n1p1 of=/mnt/backup-drive/system-backups/bootloader/efi-partition-$BACKUP_DATE.img bs=1M
-sudo sfdisk -d /dev/nvme0n1 > /mnt/backup-drive/system-backups/bootloader/partition-table-$BACKUP_DATE.txt
-sudo efibootmgr -v > /mnt/backup-drive/system-backups/bootloader/efi-boot-entries-$BACKUP_DATE.txt
+mkdir -p "$SYSTEM_BACKUPS_DIR/bootloader"
+sudo dd if=/dev/nvme0n1 of="$SYSTEM_BACKUPS_DIR/bootloader/nvme0n1-mbr-$BACKUP_DATE.img" bs=512 count=2048
+sudo dd if=/dev/nvme0n1p1 of="$SYSTEM_BACKUPS_DIR/bootloader/efi-partition-$BACKUP_DATE.img" bs=1M
+sudo sfdisk -d /dev/nvme0n1 > "$SYSTEM_BACKUPS_DIR/bootloader/partition-table-$BACKUP_DATE.txt"
+sudo efibootmgr -v > "$SYSTEM_BACKUPS_DIR/bootloader/efi-boot-entries-$BACKUP_DATE.txt"
 
 # 5. Restic backup for important directories
 log "Running Restic backup..."
@@ -88,7 +93,7 @@ if restic backup \
     --exclude='*/Trash' \
     --tag system-backup \
     --tag "$BACKUP_DATE" \
-    /home/b3l13v3r \
+    "$HOME" \
     /etc \
     /var/lib/docker \
     /opt; then
@@ -105,9 +110,9 @@ fi
 # 6. Clean old backups
 log "Cleaning old backups..."
 # Keep only last 30 days of config archives
-find /mnt/backup-drive/system-backups/configs -type f -mtime +30 -delete
-find /mnt/backup-drive/system-backups/packages -type f -mtime +90 -delete
-find /mnt/backup-drive/system-backups/bootloader -type f -mtime +30 -delete
+find "$SYSTEM_BACKUPS_DIR/configs" -type f -mtime +30 -delete
+find "$SYSTEM_BACKUPS_DIR/packages" -type f -mtime +90 -delete
+find "$SYSTEM_BACKUPS_DIR/bootloader" -type f -mtime +30 -delete
 
 # Restic cleanup
 restic forget --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
@@ -124,5 +129,5 @@ else
 fi
 
 # Send success notification with details
-BACKUP_SIZE=$(du -sh /mnt/backup-drive/btrbk-snapshots/ 2>/dev/null | cut -f1 || echo "unknown")
+BACKUP_SIZE=$(du -sh "$BTRBK_SNAPSHOTS_DIR" 2>/dev/null | cut -f1 || echo "unknown")
 "$NOTIFICATION_SCRIPT" "System Backup Complete" "✅ Daily backup finished successfully\nDuration: $DURATION_FORMATTED\nSnapshot size: $BACKUP_SIZE\nCompleted: $(date '+%Y-%m-%d %H:%M')" "low" "drive-harddisk"

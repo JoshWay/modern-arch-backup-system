@@ -1,0 +1,21 @@
+# Example Backup System Configuration
+# Copy this to ~/.config/backup-system/backup.conf and customize
+
+# User settings
+BACKUP_USER="your-username"
+
+# Storage locations - customize these for your setup
+BACKUP_STORAGE_ROOT="/mnt/backup-storage"
+BTRBK_SNAPSHOTS_DIR="$BACKUP_STORAGE_ROOT/btrbk-snapshots"
+RESTIC_REPO_DIR="$BACKUP_STORAGE_ROOT/restic-repo"
+SYSTEM_BACKUPS_DIR="$BACKUP_STORAGE_ROOT/system-backups"
+
+# Configuration paths (usually don't need to change)
+BTRBK_CONFIG="/etc/btrbk/btrbk.conf"
+NOTIFICATION_SCRIPT="/usr/local/bin/kde-notify-final.sh"
+
+# Notification settings
+NOTIFICATION_USER="$BACKUP_USER"
+
+# Optional: Restic environment file location
+RESTIC_ENV_FILE="$HOME/.config/backup-system/.restic-env"

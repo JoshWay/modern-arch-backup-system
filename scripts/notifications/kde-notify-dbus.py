@@ -12,8 +12,23 @@ def send_kde_notification(app_name, title, message, icon="drive-harddisk", timeo
         # Set up D-Bus session
         if os.geteuid() == 0:
             # Running as root - need to connect to user's session
-            bus_address = "unix:path=/run/user/1000/bus"
-            bus = dbus.bus.BusConnection(bus_address)
+            # Try to get target user from environment or sudo
+            target_user = os.environ.get('NOTIFICATION_USER', os.environ.get('SUDO_USER', None))
+            
+            if target_user:
+                # Get UID for the target user
+                import pwd
+                try:
+                    uid = pwd.getpwnam(target_user).pw_uid
+                    bus_address = f"unix:path=/run/user/{uid}/bus"
+                    bus = dbus.bus.BusConnection(bus_address)
+                except:
+                    # Fallback to system bus if user lookup fails
+                    print(f"Warning: Could not find user {target_user}, using system bus")
+                    bus = dbus.SystemBus()
+            else:
+                print("Warning: Running as root without target user, notifications may fail")
+                bus = dbus.SystemBus()
         else:
             # Running as regular user
             bus = dbus.SessionBus()
