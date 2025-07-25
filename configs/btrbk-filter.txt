@@ -1,0 +1,38 @@
+# btrbk filter rules - exclude unnecessary directories from snapshots
+# Trash directories
+- .local/share/Trash/
+- .Trash/
+- Trash/
+
+# Cache directories
+- .cache/
+- Cache/
+- cache/
+
+# Downloads (can be re-downloaded)
+- Downloads/
+- downloads/
+
+# Temporary files
+- tmp/
+- .tmp/
+- temp/
+
+# Large media files that should be backed up separately
+- Videos/
+- Music/
+
+# Virtual machine images
+- VirtualBox VMs/
+- .vagrant.d/
+- libvirt/
+
+# Build artifacts
+- node_modules/
+- target/
+- build/
+- dist/
+
+# ISO files
+- *.iso
+- *.ISO

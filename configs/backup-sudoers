@@ -1,0 +1,11 @@
+# Sudoers rule for backup operations
+# This allows the backup user to run specific backup commands without password
+# Copy this to /etc/sudoers.d/backup-operations
+
+# Allow backup operations without password
+b3l13v3r ALL=(ALL) NOPASSWD: /usr/bin/btrbk
+b3l13v3r ALL=(ALL) NOPASSWD: /usr/bin/btrfs
+b3l13v3r ALL=(ALL) NOPASSWD: /usr/bin/du -sh /.snapshots/home-essential.*
+b3l13v3r ALL=(ALL) NOPASSWD: /usr/bin/chown -R b3l13v3r\:b3l13v3r /.snapshots/home-essential.*
+b3l13v3r ALL=(ALL) NOPASSWD: /usr/bin/mkdir -p /.snapshots/home-essential.*
+b3l13v3r ALL=(ALL) NOPASSWD: /usr/bin/cp -a /home/b3l13v3r/* /.snapshots/home-essential.*

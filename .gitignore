@@ -1,0 +1,35 @@
+# Backup system sensitive files
+.restic-env
+restic-password.txt
+*.key
+*.pem
+
+# Log files
+*.log
+/var/log/
+
+# Temporary files
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+*.swp
+*.swo
+*~
+
+# Backup directories (examples)
+/mnt/backup-drive/
+/mnt/raid-storage/
+
+# System-specific paths
+/dev/
+/proc/
+/sys/
+/run/
+
+# Personal configuration overrides
+local-config/
+user-overrides/

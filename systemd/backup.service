@@ -1,0 +1,17 @@
+[Unit]
+Description=System and Home Backup Service
+After=graphical-session.target
+Wants=backup.timer
+
+[Service]
+Type=oneshot
+User=b3l13v3r
+Group=b3l13v3r
+Environment=DISPLAY=:0
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+ExecStart=/home/b3l13v3r/scripts/master-backup.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
