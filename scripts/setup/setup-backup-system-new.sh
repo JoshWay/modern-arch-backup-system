@@ -13,6 +13,7 @@ NC='\033[0m' # No Color
 # Load configuration if running from repo
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 if [[ -f "${SCRIPT_DIR}/../common/load-config.sh" ]]; then
+    # shellcheck source=../common/load-config.sh
     source "${SCRIPT_DIR}/../common/load-config.sh"
 else
     # Set defaults if config not available
@@ -177,7 +178,7 @@ echo -e "\n${YELLOW}7. Creating user configuration...${NC}"
 
 USER_CONFIG="$ACTUAL_HOME/.config/backup-system/backup.conf"
 if [[ ! -f "$USER_CONFIG" ]]; then
-    sudo -u "$ACTUAL_USER" cat > "$USER_CONFIG" << EOF
+    sudo -u "$ACTUAL_USER" tee "$USER_CONFIG" > /dev/null << EOF
 # Backup System Configuration for $ACTUAL_USER
 # Customize these settings for your system
 
@@ -213,7 +214,7 @@ if [[ -d "$BACKUP_STORAGE_ROOT/restic-repo" ]] && [[ ! -f "$BACKUP_STORAGE_ROOT/
     
     # Create restic environment file
     RESTIC_ENV="$ACTUAL_HOME/.config/backup-system/.restic-env"
-    sudo -u "$ACTUAL_USER" cat > "$RESTIC_ENV" << EOF
+    sudo -u "$ACTUAL_USER" tee "$RESTIC_ENV" > /dev/null << EOF
 # Restic environment configuration
 export RESTIC_REPOSITORY="$BACKUP_STORAGE_ROOT/restic-repo"
 # export RESTIC_PASSWORD="your-password-here"

@@ -104,8 +104,8 @@ tar -czf /mnt/raid-storage/system-backups/configs/dotfiles-$BACKUP_DATE.tar.gz \
 log "Backing up bootloader and partition table..."
 sudo dd if=/dev/nvme0n1 of=/mnt/raid-storage/system-backups/bootloader/nvme0n1-mbr-$BACKUP_DATE.img bs=512 count=2048
 sudo dd if=/dev/nvme0n1p1 of=/mnt/raid-storage/system-backups/bootloader/efi-partition-$BACKUP_DATE.img bs=1M
-sudo sfdisk -d /dev/nvme0n1 > /mnt/raid-storage/system-backups/bootloader/partition-table-$BACKUP_DATE.txt
-sudo efibootmgr -v > /mnt/raid-storage/system-backups/bootloader/efi-boot-entries-$BACKUP_DATE.txt
+sudo sfdisk -d /dev/nvme0n1 | sudo tee /mnt/raid-storage/system-backups/bootloader/partition-table-$BACKUP_DATE.txt > /dev/null
+sudo efibootmgr -v | sudo tee /mnt/raid-storage/system-backups/bootloader/efi-boot-entries-$BACKUP_DATE.txt > /dev/null
 
 # 5. Restic backup for important directories
 log "Running Restic backup..."

@@ -69,6 +69,7 @@ echo -e "\n${YELLOW}4. Testing configuration...${NC}"
 
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 if [[ -f "${SCRIPT_DIR}/../common/load-config.sh" ]]; then
+    # shellcheck source=../common/load-config.sh
     source "${SCRIPT_DIR}/../common/load-config.sh"
     
     echo "Loaded configuration:"

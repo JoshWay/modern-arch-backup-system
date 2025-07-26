@@ -7,6 +7,7 @@ set -e
 
 # Load common configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# shellcheck source=../common/load-config.sh
 source "${SCRIPT_DIR}/../common/load-config.sh"
 
 # Use the notify function from common config
@@ -68,7 +69,7 @@ echo "Backup Summary"
 echo "========================================"
 
 echo "Current backups on target drive:"
-ls -lah "$BTRBK_SNAPSHOTS_DIR" | grep -E "(ROOT|home-essential)" | tail -10
+ls -lah "$BTRBK_SNAPSHOTS_DIR"/ROOT* "$BTRBK_SNAPSHOTS_DIR"/home-essential* 2>/dev/null | tail -10
 
 echo ""
 echo "Disk usage after backup:"

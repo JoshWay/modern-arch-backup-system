@@ -5,6 +5,7 @@ set -euo pipefail
 
 # Load common configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# shellcheck source=../common/load-config.sh
 source "${SCRIPT_DIR}/../common/load-config.sh"
 
 # Trap to handle errors and send failure notification
@@ -23,6 +24,7 @@ if command -v systemd-creds &> /dev/null && systemd-creds list 2>/dev/null | gre
     export RESTIC_PASSWORD=$(systemd-creds cat restic-password)
 elif [[ -f "$RESTIC_ENV_FILE" ]]; then
     # Load from environment file
+    # shellcheck source=/dev/null
     source "$RESTIC_ENV_FILE"
 else
     echo "Error: No Restic environment configuration found!"
@@ -72,8 +74,8 @@ log "Backing up bootloader and partition table..."
 mkdir -p "$SYSTEM_BACKUPS_DIR/bootloader"
 sudo dd if=/dev/nvme0n1 of="$SYSTEM_BACKUPS_DIR/bootloader/nvme0n1-mbr-$BACKUP_DATE.img" bs=512 count=2048
 sudo dd if=/dev/nvme0n1p1 of="$SYSTEM_BACKUPS_DIR/bootloader/efi-partition-$BACKUP_DATE.img" bs=1M
-sudo sfdisk -d /dev/nvme0n1 > "$SYSTEM_BACKUPS_DIR/bootloader/partition-table-$BACKUP_DATE.txt"
-sudo efibootmgr -v > "$SYSTEM_BACKUPS_DIR/bootloader/efi-boot-entries-$BACKUP_DATE.txt"
+sudo sfdisk -d /dev/nvme0n1 | sudo tee "$SYSTEM_BACKUPS_DIR/bootloader/partition-table-$BACKUP_DATE.txt" > /dev/null
+sudo efibootmgr -v | sudo tee "$SYSTEM_BACKUPS_DIR/bootloader/efi-boot-entries-$BACKUP_DATE.txt" > /dev/null
 
 # 5. Restic backup for important directories
 log "Running Restic backup..."

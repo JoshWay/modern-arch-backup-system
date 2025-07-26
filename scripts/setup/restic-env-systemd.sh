@@ -6,8 +6,10 @@ set -euo pipefail
 
 # Load configuration
 if [[ -f "/etc/backup-system/backup.conf" ]]; then
+    # shellcheck source=/etc/backup-system/backup.conf
     source "/etc/backup-system/backup.conf"
 elif [[ -f "$HOME/.config/backup-system/backup.conf" ]]; then
+    # shellcheck source=/dev/null
     source "$HOME/.config/backup-system/backup.conf"
 else
     echo "Error: No backup configuration found!" >&2
@@ -24,6 +26,7 @@ if command -v systemd-creds &> /dev/null && systemd-creds list 2>/dev/null | gre
 elif [[ -f "$HOME/.config/backup-system/.restic-env" ]]; then
     # Load from user config
     set +x  # Ensure passwords aren't printed
+    # shellcheck source=/dev/null
     source "$HOME/.config/backup-system/.restic-env"
     set -x
 else

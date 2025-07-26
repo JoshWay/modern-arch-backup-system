@@ -19,6 +19,7 @@ fi
 
 # Load user configuration if it exists
 if [[ -f "$BACKUP_CONFIG_FILE" ]]; then
+    # shellcheck source=/dev/null
     source "$BACKUP_CONFIG_FILE"
 fi
 
