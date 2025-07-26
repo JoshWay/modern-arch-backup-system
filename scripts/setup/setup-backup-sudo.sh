@@ -29,7 +29,7 @@ echo "Installing sudoers rule..."
 echo "You will be prompted for your password to install the sudo rule."
 
 # Copy the sudoers rule
-if sudo cp /home/b3l13v3r/scripts/backup-sudoers /etc/sudoers.d/backup-operations; then
+if sudo cp "$HOME/scripts/backup-sudoers" /etc/sudoers.d/backup-operations; then
     echo "✅ Sudoers rule installed successfully"
     
     # Set proper permissions
@@ -51,7 +51,7 @@ if sudo cp /home/b3l13v3r/scripts/backup-sudoers /etc/sudoers.d/backup-operation
         echo "✅ Setup completed successfully!"
         echo ""
         echo "You can now run backups with:"
-        echo "  /home/b3l13v3r/scripts/master-backup.sh"
+        echo "  $HOME/scripts/master-backup.sh"
         echo ""
         echo "Or set up automated daily backups with:"
         echo "  sudo systemctl enable backup.timer"

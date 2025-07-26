@@ -30,15 +30,15 @@ fi
 echo -n "$RESTIC_PASSWORD" | systemd-creds encrypt --name=restic-password - /etc/credstore/restic-password
 
 # Create a wrapper script that retrieves the password
-cat > /home/b3l13v3r/scripts/restic-env-secure.sh << 'EOF'
+cat > "$HOME/scripts/restic-env-secure.sh" << 'EOF'
 #!/bin/bash
 # Secure Restic environment loader
 export RESTIC_REPOSITORY=/mnt/raid-storage/restic-repo
 export RESTIC_PASSWORD=$(sudo systemd-creds decrypt /etc/credstore/restic-password -)
 EOF
 
-chmod 755 /home/b3l13v3r/scripts/restic-env-secure.sh
-chown b3l13v3r:b3l13v3r /home/b3l13v3r/scripts/restic-env-secure.sh
+chmod 755 "$HOME/scripts/restic-env-secure.sh"
+chown "$USER:$USER" "$HOME/scripts/restic-env-secure.sh"
 
 echo ""
 echo "✓ Password stored securely using systemd-creds"
@@ -48,5 +48,5 @@ echo "The password is now encrypted and stored in /etc/credstore/restic-password
 echo "Only root and systemd can decrypt it."
 echo ""
 echo "To use Restic with the encrypted password:"
-echo "  source /home/b3l13v3r/scripts/restic-env-secure.sh"
+echo "  source $HOME/scripts/restic-env-secure.sh"
 echo ""
