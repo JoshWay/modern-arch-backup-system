@@ -43,7 +43,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
                 sudo btrbk -c "$HOME/scripts/btrbk.conf" list
                 ;;
             "List Restic snapshots")
-                # shellcheck source=/home/b3l13v3r/scripts/.restic-env
+                # shellcheck source=$HOME/scripts/.restic-env
                 source "$HOME/scripts/.restic-env"
                 restic snapshots
                 ;;
