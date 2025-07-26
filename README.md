@@ -159,6 +159,25 @@ Contributions are welcome! Please:
 4. Add tests if applicable
 5. Submit a pull request
 
+## Testing & Continuous Integration
+
+Automated tests run via GitHub Actions. The workflow uses **Podman** to build an Arch Linux container and execute `scripts/test-installation.sh`.
+Static analysis with ShellCheck and Flake8 as well as Bats unit tests are run on each pull request.
+
+To run the checks locally:
+
+```bash
+# install dependencies using your package manager
+# example on Arch Linux
+sudo pacman -S podman shellcheck bats-core python-flake8
+
+# run tests
+bats tests
+podman build -t backup-test -f Containerfile .
+podman run --rm backup-test
+```
+
+
 ## Requirements
 
 - Arch Linux

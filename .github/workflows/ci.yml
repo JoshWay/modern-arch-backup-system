@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  lint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y podman shellcheck bats python3-pip
+          pip3 install flake8
+      - name: ShellCheck
+        run: shellcheck $(git ls-files "*.sh")
+      - name: Flake8
+        run: flake8 scripts/notifications/kde-notify-dbus.py
+      - name: Run Bats tests
+        run: bats tests
+      - name: Build integration container
+        run: podman build -t backup-test -f Containerfile .
+      - name: Run integration test
+        run: podman run --rm backup-test
+
