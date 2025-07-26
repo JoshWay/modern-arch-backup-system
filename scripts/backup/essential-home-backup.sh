@@ -19,7 +19,7 @@ send_notification() {
 }
 
 TIMESTAMP=$(date +%Y%m%dT%H%M)
-HOME_USER="b3l13v3r"
+HOME_USER="your-username"
 SOURCE_HOME="/home/$HOME_USER"
 SNAPSHOT_DIR="/.snapshots"
 TARGET_DIR="/mnt/backup-drive/btrbk-snapshots"

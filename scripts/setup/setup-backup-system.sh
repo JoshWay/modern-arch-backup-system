@@ -14,7 +14,7 @@ NC='\033[0m' # No Color
 BACKUP_ROOT="/mnt/raid-storage/system-backups"
 RESTIC_REPO="/mnt/raid-storage/restic-repo"
 BTRBK_ROOT="/mnt/raid-storage/btrbk-snapshots"
-SCRIPTS_DIR="/home/b3l13v3r/scripts"
+SCRIPTS_DIR="/home/your-username/scripts"
 
 echo -e "${GREEN}Setting up Modern Arch Linux Backup System${NC}"
 
@@ -24,7 +24,7 @@ sudo mkdir -p "$BACKUP_ROOT"/{configs,packages,bootloader}
 sudo mkdir -p "$RESTIC_REPO"
 sudo mkdir -p "$BTRBK_ROOT"
 sudo mkdir -p "$SCRIPTS_DIR"
-sudo chown -R b3l13v3r:b3l13v3r "$BACKUP_ROOT" "$RESTIC_REPO" "$BTRBK_ROOT" "$SCRIPTS_DIR"
+sudo chown -R your-username:your-username "$BACKUP_ROOT" "$RESTIC_REPO" "$BTRBK_ROOT" "$SCRIPTS_DIR"
 
 # 1. Setup BTRFS snapshot configuration with btrbk
 echo -e "${YELLOW}Setting up btrbk for BTRFS snapshots...${NC}"
@@ -67,7 +67,7 @@ cat > "$SCRIPTS_DIR/system-backup.sh" << 'EOF'
 # Comprehensive Arch Linux Backup Script
 
 set -euo pipefail
-source /home/b3l13v3r/scripts/.restic-env
+source /home/your-username/scripts/.restic-env
 
 BACKUP_DATE=$(date +%Y%m%d_%H%M%S)
 LOG_FILE="/var/log/system-backup-$BACKUP_DATE.log"
@@ -81,7 +81,7 @@ log "Starting system backup..."
 
 # 1. BTRFS Snapshots with btrbk
 log "Creating BTRFS snapshots..."
-sudo btrbk -c /home/b3l13v3r/scripts/btrbk.conf run
+sudo btrbk -c /home/your-username/scripts/btrbk.conf run
 
 # 2. Package lists
 log "Backing up package lists..."
@@ -93,11 +93,11 @@ pacman -Qqe | grep -Fvx "$(pacman -Qqm)" > /mnt/raid-storage/system-backups/pack
 log "Backing up system configurations..."
 sudo tar -czf /mnt/raid-storage/system-backups/configs/etc-$BACKUP_DATE.tar.gz /etc
 tar -czf /mnt/raid-storage/system-backups/configs/dotfiles-$BACKUP_DATE.tar.gz \
-    /home/b3l13v3r/.config \
-    /home/b3l13v3r/.local \
-    /home/b3l13v3r/.bashrc \
-    /home/b3l13v3r/.zshrc \
-    /home/b3l13v3r/.gitconfig \
+    /home/your-username/.config \
+    /home/your-username/.local \
+    /home/your-username/.bashrc \
+    /home/your-username/.zshrc \
+    /home/your-username/.gitconfig \
     2>/dev/null || true
 
 # 4. Bootloader and partition info
@@ -116,7 +116,7 @@ restic backup \
     --exclude='/home/*/.local/share/Trash' \
     --tag system-backup \
     --tag "$BACKUP_DATE" \
-    /home/b3l13v3r \
+    /home/your-username \
     /etc \
     /var/lib/docker \
     /opt
@@ -145,13 +145,13 @@ echo "Arch Linux System Restore Helper"
 echo "================================"
 echo ""
 echo "1. List available BTRFS snapshots:"
-echo "   sudo btrbk -c /home/b3l13v3r/scripts/btrbk.conf list"
+echo "   sudo btrbk -c /home/your-username/scripts/btrbk.conf list"
 echo ""
 echo "2. Restore from BTRFS snapshot:"
-echo "   sudo btrbk -c /home/b3l13v3r/scripts/btrbk.conf restore <snapshot> <target>"
+echo "   sudo btrbk -c /home/your-username/scripts/btrbk.conf restore <snapshot> <target>"
 echo ""
 echo "3. List Restic snapshots:"
-echo "   source /home/b3l13v3r/scripts/.restic-env"
+echo "   source /home/your-username/scripts/.restic-env"
 echo "   restic snapshots"
 echo ""
 echo "4. Mount Restic snapshot:"
@@ -178,10 +178,10 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     do
         case $opt in
             "List BTRFS snapshots")
-                sudo btrbk -c /home/b3l13v3r/scripts/btrbk.conf list
+                sudo btrbk -c /home/your-username/scripts/btrbk.conf list
                 ;;
             "List Restic snapshots")
-                source /home/b3l13v3r/scripts/.restic-env
+                source /home/your-username/scripts/.restic-env
                 restic snapshots
                 ;;
             "List package backups")
@@ -214,12 +214,12 @@ After=multi-user.target
 
 [Service]
 Type=oneshot
-ExecStart=/home/b3l13v3r/scripts/system-backup.sh
+ExecStart=/home/your-username/scripts/system-backup.sh
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=system-backup
-User=b3l13v3r
-Group=b3l13v3r
+User=your-username
+Group=your-username
 
 [Install]
 WantedBy=multi-user.target

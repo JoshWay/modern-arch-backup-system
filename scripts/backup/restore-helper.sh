@@ -7,13 +7,13 @@ echo "Arch Linux System Restore Helper"
 echo "================================"
 echo ""
 echo "1. List available BTRFS snapshots:"
-echo "   sudo btrbk -c /home/b3l13v3r/scripts/btrbk.conf list"
+echo "   sudo btrbk -c /home/your-username/scripts/btrbk.conf list"
 echo ""
 echo "2. Restore from BTRFS snapshot:"
-echo "   sudo btrbk -c /home/b3l13v3r/scripts/btrbk.conf restore <snapshot> <target>"
+echo "   sudo btrbk -c /home/your-username/scripts/btrbk.conf restore <snapshot> <target>"
 echo ""
 echo "3. List Restic snapshots:"
-echo "   source /home/b3l13v3r/scripts/.restic-env"
+echo "   source /home/your-username/scripts/.restic-env"
 echo "   restic snapshots"
 echo ""
 echo "4. Mount Restic snapshot:"
@@ -40,10 +40,10 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     do
         case $opt in
             "List BTRFS snapshots")
-                sudo btrbk -c /home/b3l13v3r/scripts/btrbk.conf list
+                sudo btrbk -c /home/your-username/scripts/btrbk.conf list
                 ;;
             "List Restic snapshots")
-                source /home/b3l13v3r/scripts/.restic-env
+                source /home/your-username/scripts/.restic-env
                 restic snapshots
                 ;;
             "List package backups")
