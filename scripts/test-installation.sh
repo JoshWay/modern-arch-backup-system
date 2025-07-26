@@ -60,6 +60,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 if [[ -f "${SCRIPT_DIR}/common/load-config.sh" ]]; then
     echo "Running from repository (development mode)"
+    # shellcheck source=common/load-config.sh
     source "${SCRIPT_DIR}/common/load-config.sh"
 elif [[ -f "/usr/local/bin/backup-load-config.sh" ]]; then
     echo "Running from installed location"

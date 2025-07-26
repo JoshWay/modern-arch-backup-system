@@ -7,6 +7,7 @@ set -euo pipefail
 
 # Load common configuration
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+# shellcheck source=../common/load-config.sh
 source "${SCRIPT_DIR}/../common/load-config.sh"
 
 TIMESTAMP=$(date +%Y%m%dT%H%M)
